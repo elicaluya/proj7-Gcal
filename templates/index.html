@@ -79,6 +79,10 @@
     });
   </script>
 
+<h3>Time Range</h3>  
+Start:<input type = "time" name = "start_time" value = "12:00">
+End:<input type = "time" name = "end_time" value = "12:00">
+<br>
 <br /><input type="submit" value="Choose" />
 </form>
 
@@ -88,10 +92,12 @@
     shown in each row (but the order is across then down; I would
     prefer down then across). 
     -->
+<form action = "/select" method = "get">
 {% if g.calendars is defined  %}
   <div class="row">
   {% for cal in g.calendars if cal.selected %}
           <div class="col-md-4">
+          <input type = "checkbox" name = "check" value = "{{cal.id}}">
 	   {{ cal.summary }}
           </div>
          {% if loop.index is divisibleby 3 %}
@@ -100,7 +106,19 @@
   {% endfor %}
   </div>
 {% endif %}
-    
+<input type = "submit" value = "Select"/>
+</form> 
+
+<script>
+$(document).ready(function(){
+	$("form").submit(function(){
+	var date = $('#check').val();
+	var start_time = $('#start_time).val();
+	var end_time = $('#end_time).val();
+	});
+});
+
+</script>   
 
   </div>  <!-- container (for bootstrap) -->
   </body> </html>

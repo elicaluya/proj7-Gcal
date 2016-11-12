@@ -9,7 +9,7 @@ import logging
 
 # Date handling 
 import arrow # Replacement for datetime, based on moment.js
-# import datetime # But we still need time
+from datetime import * # But we still need time
 from dateutil import tz  # For interpreting local times
 
 
@@ -204,6 +204,38 @@ def setrange():
     app.logger.debug("Setrange parsed {} - {}  dates as {} - {}".format(
       daterange_parts[0], daterange_parts[1], 
       flask.session['begin_date'], flask.session['end_date']))
+    return flask.redirect(flask.url_for("choose"))
+    
+# Method for selecting a calendar and displaying the events in the given range specified by the user    
+@app.route('/select')
+def select():
+    credentials = valid_credentials()
+    gcal_service = get_gcal_service(credentials)
+    app.logger.debug("Returned from get_gcal_service")
+    
+    # Create arrow objects for the time range specified by the user
+    start = request.args.get("start_time",type=str)
+    end = request.args.get("end_time",type=str)
+    time_start = arrow.get(start)
+    time_end = arrow.get(end)
+    
+    # Display all events that are in the range that the user specified
+    calendars = request.args.getlist("check")
+    for cal in calendars:
+    	data = gcal_service.events().list(calendarId=cal, timeMin = flask.session['begin_date'], timeMax= flask.session['end_date']).execute()
+    	for event in data['items']:
+    		# Specifies if the event has a time in it or is an all day event
+    		if 'dateTime' in event['start']:
+    			event_start = arrow.get(event['start']['dateTime']).format('YYYY-MM-DD HH:mm:ss')
+    			flask.flash("Event found: " + event['summary'])
+    			flask.flash("Event at: " + str(event_start))
+    		else:
+    			flask.flash("Event found: " + event['summary'])
+    			flask.flash("All day event at: " + str(event['start']['date']))
+    			
+    			
+    	
+    		
     return flask.redirect(flask.url_for("choose"))
 
 ####
